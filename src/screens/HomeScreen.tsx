@@ -4,6 +4,7 @@ import DashboardCard from '../components/DashboardCard';
 import AuthButton from '../components/AuthButton';
 import { dashboardStyles } from '../styles/dashboardStyles';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { fetchThingSpeakData } from '../services/thingspeakService';
 
 const HomeScreen = ({ navigation }) => {
@@ -15,6 +16,31 @@ const HomeScreen = ({ navigation }) => {
     lastUpdate: '--'
   });
 
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true;
+
+      const loadData = async () => {
+        try {
+          const data = await fetchThingSpeakData();
+          if (isActive && data) {
+            setTankData(data);
+          }
+        } catch (error) {
+          console.error('Error loading data:', error);
+        }
+      };
+
+      loadData();
+      const interval = setInterval(loadData, 30000); // 30 segundos
+
+      return () => {
+        isActive = false;
+        clearInterval(interval);
+      };
+    }, [])
+  );
+  
   useEffect(() => {
     const loadData = async () => {
       try {
