@@ -1,11 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, Image } from 'react-native';
 import DashboardCard from '../components/DashboardCard';
 import AuthButton from '../components/AuthButton';
 import { dashboardStyles } from '../styles/dashboardStyles';
 import { Ionicons } from '@expo/vector-icons';
+import { fetchThingSpeakData } from '../services/thingspeakService';
 
 const HomeScreen = ({ navigation }) => {
+  const [tankData, setTankData] = useState({
+    distance: '--',
+    temperature: '--',
+    humidity: '--',
+    waterPercentage: '--',
+    lastUpdate: '--'
+  });
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchThingSpeakData();
+        if (data) {
+          setTankData(data);
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 300000); // Actualizar cada 5 minutos
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={dashboardStyles.container}>
       <Text style={dashboardStyles.title}>Bienvenido a AquaViva</Text>
@@ -25,20 +52,28 @@ const HomeScreen = ({ navigation }) => {
       <DashboardCard
         icon={<Ionicons name="water-outline" size={28} color="#00796b" />}
         title="Nivel del tanque"
-        value="75%"
+        value={tankData.waterPercentage}
+        showProgress={true} // Solo aquí necesitamos la barra de progreso
+      />
+
+
+      <DashboardCard
+        icon={<Ionicons name="thermometer-outline" size={28} color="#00796b" />}
+        title="Temperatura"
+        value={tankData.temperature}
+      // No pasamos showProgress (usará el valor por defecto false)
       />
 
       <DashboardCard
-        icon={<Ionicons name="cloud-outline" size={28} color="#00796b" />}
-        title="Pronóstico de lluvia"
-        value="Moderada en 2 días"
+        icon={<Ionicons name="cloudy-outline" size={28} color="#00796b" />}
+        title="Humedad ambiente"
+        value={tankData.humidity}
+      // No pasamos showProgress (usará el valor por defecto false)
       />
 
-      <DashboardCard
-        icon={<Ionicons name="bar-chart-outline" size={28} color="#00796b" />}
-        title="Última captación"
-        value="350 Litros"
-      />
+      <Text style={{ marginBottom: 16, color: '#004d40', fontSize: 12 }}>
+        Última actualización: {tankData.lastUpdate}
+      </Text>
 
       <AuthButton
         title="Ver Historial"

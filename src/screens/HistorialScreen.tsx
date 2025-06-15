@@ -1,32 +1,53 @@
-import React from 'react';
-import { View, Text, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, ActivityIndicator } from 'react-native';
 import HistoryItem from '../components/HistoryItem';
 import { historyStyles } from '../styles/historyStyles';
-
-const historyData = [
-  { id: '1', fecha: '12 de abril de 2025', cantidad: '350 L' },
-  { id: '2', fecha: '10 de abril de 2025', cantidad: '420 L' },
-  { id: '3', fecha: '7 de abril de 2025', cantidad: '280 L' },
-  { id: '4', fecha: '4 de abril de 2025', cantidad: '310 L' },
-  { id: '5', fecha: '1 de abril de 2025', cantidad: '390 L' },
-];
+import { fetchThingSpeakHistory } from '../services/thingspeakService';
 
 const HistoryScreen = () => {
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchThingSpeakHistory(15);
+        setHistoryData(data);
+      } catch (error) {
+        console.error('Error loading history:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHistory();
+  }, []);
+
   return (
     <View style={historyStyles.container}>
-      <Text style={historyStyles.title}>Historial de captaciones</Text>
+      <Text style={historyStyles.title}>Historial de mediciones</Text>
 
-      <FlatList
-        data={historyData}
-        renderItem={({ item }) => (
-          <HistoryItem
-            date={item.fecha}
-            amount={item.cantidad}
-          />
-        )}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={historyStyles.listContent}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#00796b" style={{ marginTop: 20 }} />
+      ) : historyData.length === 0 ? (
+        <Text style={{ textAlign: 'center', marginTop: 20, color: '#004d40' }}>
+          No hay datos históricos disponibles
+        </Text>
+      ) : (
+        <FlatList
+          data={historyData}
+          renderItem={({ item }) => (
+            <HistoryItem
+              date={item.date}
+              time={item.time}
+              amount={`Nivel: ${item.waterPercentage} | Dist: ${item.distance} | Temp: ${item.temperature} | Hum: ${item.humidity}`}
+            />
+          )}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={historyStyles.listContent}
+        />
+      )}
     </View>
   );
 };

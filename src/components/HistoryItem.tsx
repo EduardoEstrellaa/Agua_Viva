@@ -1,44 +1,49 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
-const HistoryItem = ({ date, amount }) => {
+interface HistoryItemProps {
+    date: string;
+    time: string;
+    amount: string;
+}
+
+const HistoryItem: React.FC<HistoryItemProps> = ({ date, time, amount }) => {
     return (
-        <View style={styles.item}>
-            <Ionicons name="rainy-outline" size={24} color="#00796b" />
-            <View style={styles.itemContent}>
+        <View style={styles.container}>
+            <View style={styles.timeContainer}>
                 <Text style={styles.date}>{date}</Text>
-                <Text style={styles.amount}>{amount} captados</Text>
+                <Text style={styles.time}>{time}</Text>
             </View>
+            <Text style={styles.amount}>{amount}</Text>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    item: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    container: {
         backgroundColor: '#ffffff',
         padding: 16,
-        borderRadius: 10,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        marginBottom: 8,
+        borderRadius: 8,
+        width: '100%',
     },
-    itemContent: {
-        marginLeft: 12,
+    timeContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 4,
     },
     date: {
-        fontSize: 16,
+        fontSize: 14,
+        color: '#00796b',
         fontWeight: 'bold',
-        color: '#004d40',
+    },
+    time: {
+        fontSize: 14,
+        color: '#00796b',
     },
     amount: {
         fontSize: 14,
-        color: '#00796b',
-        marginTop: 4,
+        color: '#004d40',
     },
 });
 
